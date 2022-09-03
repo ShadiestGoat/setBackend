@@ -106,8 +106,14 @@ func (mgr *ManagerGame) SendRaw(id string, msg *websocket.PreparedMessage) {
 	// mgr.Unlock()
 }
 
-var GameMgr = &ManagerGame{}
-var UserMgr = &ManagerUser{}
+var GameMgr = &ManagerGame{
+	ManagerBase: ManagerBase{},
+	Games:       map[string]*Game{},
+}
+var UserMgr = &ManagerUser{
+	ManagerBase: ManagerBase{},
+	Users:       map[string]*User{},
+}
 
 // TODO: Add locks to prevent race conditions
 // TODO: Don't panic if error
@@ -143,6 +149,7 @@ func (u *User) Ping() {
 
 // TODO: Call this whenever a game starts, or **player** restores their connection
 func (p *Player) WSBS() {
+	
 	for {
 		_, msg, err := p.User.Conn.ReadMessage()
 		if err != nil {
@@ -184,13 +191,9 @@ func (p *Player) WSBS() {
 					})
 				}
 			} else {
-				newBoard := []string{}
-				for _, c := range game.Board {
-					newBoard = append(newBoard, c.String())
-				}
 				enc, _ := json.Marshal(EventSET{
 					PlayerID: p.User.ID,
-					Board:    newBoard,
+					Board:    game.Board,
 				})
 
 				GameMgr.Send(game.ID, Event{

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"net/http"
 	"time"
@@ -28,6 +29,7 @@ func StatusSuccess(w http.ResponseWriter) {
 
 // util function to write a unified error message
 func WriteErr(w http.ResponseWriter, err *HTTPError) {
+	fmt.Println(string(err.CachedMsg))
 	Respond(w, err.Status, err.CachedMsg)
 }
 
@@ -47,4 +49,15 @@ func CloseConn(conn *websocket.Conn) {
 	conn.WriteControl(websocket.CloseMessage, []byte{}, time.Time{})
 	conn.Close()
 	conn = nil
+}
+
+func (c Card) MarshalJSON() ([]byte, error) {
+	return []byte{
+		'"',
+		c[0],
+		c[1],
+		c[2],
+		c[3],
+		'"',
+	}, nil
 }

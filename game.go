@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"sort"
 	"time"
 
@@ -11,71 +10,62 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-type Color byte
-type Shape byte
-type Filling byte
-
 const (
-	COLOR_RED    Color = 'r'
-	COLOR_PURPLE Color = 'p'
-	COLOR_GREEN  Color = 'g'
+	COLOR_RED    byte = 'r'
+	COLOR_PURPLE byte = 'p'
+	COLOR_GREEN  byte = 'g'
 
-	SHAPE_RHOMBUS Shape = 'r'
-	SHAPE_OVAL    Shape = 'o'
-	SHAPE_WORM    Shape = 'w'
+	SHAPE_RHOMBUS byte = 'r'
+	SHAPE_OVAL    byte = 'o'
+	SHAPE_WORM    byte = 'w'
 
-	FILLING_FULL  Filling = 'f'
-	FILLING_HALF  Filling = 'h'
-	FILLING_EMPTY Filling = 'e'
+	FILLING_FULL  byte = 'f'
+	FILLING_HALF  byte = 'h'
+	FILLING_EMPTY byte = 'e'
 )
 
 var (
-	arrayColor = [3]Color{
+	arrayColor = [3]byte{
 		COLOR_RED,
 		COLOR_PURPLE,
 		COLOR_GREEN,
 	}
 
-	mapColor = map[byte]Color{
+	mapColor = map[byte]byte{
 		byte(COLOR_RED):    COLOR_RED,
 		byte(COLOR_PURPLE): COLOR_PURPLE,
 		byte(COLOR_GREEN):  COLOR_GREEN,
 	}
 
-	arrayShape = [3]Shape{
+	arrayShape = [3]byte{
 		SHAPE_RHOMBUS,
 		SHAPE_OVAL,
 		SHAPE_WORM,
 	}
 
-	mapShape = map[byte]Shape{
+	mapShape = map[byte]byte{
 		byte(SHAPE_RHOMBUS): SHAPE_RHOMBUS,
 		byte(SHAPE_OVAL):    SHAPE_OVAL,
 		byte(SHAPE_WORM):    SHAPE_WORM,
 	}
 
-	arrayFilling = [3]Filling{
+	arrayFilling = [3]byte{
 		FILLING_FULL,
 		FILLING_HALF,
 		FILLING_EMPTY,
 	}
 
-	mapFilling = map[byte]Filling{
+	mapFilling = map[byte]byte{
 		byte(FILLING_FULL):  FILLING_FULL,
 		byte(FILLING_HALF):  FILLING_HALF,
 		byte(FILLING_EMPTY): FILLING_EMPTY,
 	}
 )
 
-type Card struct {
-	Color   Color
-	Shape   Shape
-	Filling Filling
-	Number  int
-}
+type Card [4]byte
 
 func (c Card) String() string {
-	return string([]byte{byte(c.Color), byte(c.Shape), byte(c.Filling)}) + fmt.Sprint(c.Number)
+	return string(c[:])
 }
 
 func ParseCard(inp string) (Card, error) {
@@ -104,12 +94,7 @@ func ParseCard(inp string) (Card, error) {
 		return Card{}, ErrBadBody
 	}
 
-	return Card{
-		Color:   color,
-		Shape:   shape,
-		Filling: filling,
-		Number:  int(inp[3] - '0'),
-	}, nil
+	return Card{color, shape, filling, inp[3]}, nil
 }
 
 type User struct {
@@ -126,7 +111,7 @@ type User struct {
 type Player struct {
 	// Lock sync.Mutex `json:"-"`
 	User *User
-	Game *Game
+	Game *Game `json:"-"`
 	// -1 for spectator
 	SetsWon int
 	Silent  bool
@@ -142,11 +127,11 @@ const (
 
 type Game struct {
 	// Lock    *sync.Mutex
-	LastCall time.Time
-	ID       string
-	Deck     []*Card
-	Board    []*Card
+	LastCall time.Time `json:"-"`
+	ID       string `json:"id"`
+	Deck     []*Card `json:"-"`
 	Owner    *User
+	Board    []*Card 
 	State    GameState
 	Players  map[string]*Player
 }
@@ -157,27 +142,21 @@ func NewGame(owner *User) *Game {
 	for _, c := range arrayColor {
 		for _, s := range arrayShape {
 			for _, f := range arrayFilling {
-				for n := 0; n < 3; n++ {
-					deck = append(deck, &Card{
-						Color:   c,
-						Shape:   s,
-						Filling: f,
-						Number:  n,
-					})
+				for n := '0'; n < '3'; n++ {
+					deck = append(deck, &Card{c, s, f, byte(n)})
 				}
 			}
 		}
 	}
 
-	board := []*Card{}
-
 	game := &Game{
 		ID:   SnowNode.Generate().String(),
 		Deck: deck,
+		Board: []*Card{},
 		// Lock: &sync.Mutex{},
 	}
 
-	for len(board) < 12 && !BoardHasSet(board) {
+	for len(game.Board) < 12 || !BoardHasSet(game.Board) {
 		game.AddColumn()
 	}
 
@@ -355,13 +334,10 @@ func BoardHasSetIgnoring(board []*Card, blacklist []int) bool {
 
 func CorrectSet(c1, c2, c3 *Card) bool {
 	for i := 0; i < 3; i++ {
-		if (c1.Color == c2.Color && c1.Color != c3.Color) ||
-			(c1.Shape == c2.Shape && c1.Shape != c3.Shape) ||
-			(c1.Filling == c2.Filling && c1.Filling != c3.Filling) ||
-			(c1.Number == c2.Number && c1.Number != c3.Number) {
-			return true
+		for j := 0; j < 4; j++ {
+			if c1[j] == c2[j] && c1[j] != c3[j] {return false}
 		}
 		c2, c3, c1 = c1, c2, c3
 	}
-	return false
+	return true
 }

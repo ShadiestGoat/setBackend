@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -23,7 +25,12 @@ func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rawAuth := r.Header.Get("Authorization")
 		auth := strings.Split(rawAuth, " ")
-		if len(auth) == 0 || len(auth) > 2 {
+		
+		if rawAuth == "" {
+			rawAuth = r.URL.Query().Get("auth")
+		}
+
+		if rawAuth == "" || len(auth) > 2 {
 			WriteErr(w, ErrNotAuthorized)
 			return
 		}
@@ -104,13 +111,19 @@ func routerAPI() http.Handler {
 		r.Use(AuthMiddleware)
 
 		r.Post("/games", func(w http.ResponseWriter, r *http.Request) {
-			// usr := r.Context().Value(CTX_USR).(*User)
-			// game := NewGame(usr)
+			usr := r.Context().Value(CTX_USR).(*User)
+			game := NewGame(usr)
+			// TODO: GameManager.Add()
+			GameMgr.Games[game.ID] = game
+			b, err := json.Marshal(game)
+			PanicIfErr(err)
+			Respond(w, 200, b)
+
 			// TODO: Figure when & where to add & remove users to the user manager
 			// TODO: message for user ws: DISCONNECTED (eg. if they go onto another page) (TODO: Use the close ctrl message)
 		})
 
-		r.Get("/games/{gameID}/ws", func(w http.ResponseWriter, r *http.Request) {
+		r.HandleFunc("/games/{gameID}/ws", func(w http.ResponseWriter, r *http.Request) {
 			// Upgrade our raw HTTP connection to a websocket based one
 			conn, err := upgrader.Upgrade(w, r, nil)
 			if err != nil {
@@ -122,6 +135,19 @@ func routerAPI() http.Handler {
 			}
 			usr.Conn = conn
 			UserMgr.Add(usr)
+		})
+
+		r.Get("/games/{gameID}", func(w http.ResponseWriter, r *http.Request) {
+			fmt.Println("What", GameMgr.Games)
+
+			g, ok := GameMgr.Games[chi.URLParam(r, "gameID")]
+
+			if ok {
+				b, err := json.Marshal(g)
+				PanicIfErr(err)
+				Respond(w, 200, b)
+			}
+			WriteErr(w, ErrNotFound)
 		})
 	})
 

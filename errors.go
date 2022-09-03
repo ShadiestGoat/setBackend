@@ -22,7 +22,7 @@ var (
 	ErrRateLimit     = &HTTPError{Status: 429, Err: "rateLimit"}
 	ErrNotAuthorized = &HTTPError{Status: 401, Err: "notAuthorized"}
 	ErrBadBody       = &HTTPError{Status: 400, Err: "badBody"}
-	// ErrNotFound = &HTTPError{Status: 404, Err: "notFound"}
+	ErrNotFound = &HTTPError{Status: 404, Err: "notFound"}
 	// ErrBadLength = &HTTPError{Status: 400, Err: "badLength"}
 	// ErrProfanity = &HTTPError{Status: 400, Err: "profane"}
 	// ErrBodyMissing = &HTTPError{Status: 400, Err: "bodyMissing"}
@@ -34,7 +34,10 @@ var (
 
 func init() {
 	allErrors := []*HTTPError{
-		// TODO:
+		ErrRateLimit,
+		ErrNotAuthorized,
+		ErrBadBody,
+		ErrNotFound,
 	}
 	for _, err := range allErrors {
 		err.CachedMsg = []byte(fmt.Sprintf(`{"error":"%v"}`, err.Err))
