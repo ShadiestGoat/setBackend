@@ -118,13 +118,17 @@ var UserMgr = &ManagerUser{}
 // TODO: Join as spectator before the game begins
 
 func (u *User) Ping() {
+	pong := make(chan bool)
+
 	for {
 		if u.Conn != nil {
+			u.Conn.SetPongHandler(func(appData string) error {
+				pong <- true
+				return nil
+			})
+
 			u.Conn.WriteControl(websocket.PingMessage, []byte{}, time.Time{})
 			
-			u.Conn.SetPongHandler(func(appData string) error {
-
-			})
 		}
 	}
 }
