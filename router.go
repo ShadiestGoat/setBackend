@@ -146,6 +146,7 @@ func routerAPI() http.Handler {
 				b, err := json.Marshal(g)
 				PanicIfErr(err)
 				Respond(w, 200, b)
+				return
 			}
 			WriteErr(w, ErrNotFound)
 		})
