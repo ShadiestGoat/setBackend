@@ -106,21 +106,18 @@ func (mgr *ManagerGame) SendRaw(id string, msg *websocket.PreparedMessage) {
 	// mgr.Unlock()
 }
 
-// // TODO: Merge pinging in here
-// // TODO: Maybe add a lock?
-// // TODO: change the User.Conn rather than re-assign User
-
 var GameMgr = &ManagerGame{}
 var UserMgr = &ManagerUser{}
 
 // TODO: Add locks to prevent race conditions
 // TODO: Don't panic if error
-// TODO: Join as spectator before the game begins
+// TODO: Add opt Join as spectator before the game begins
 
+// TODO: Call it when adding a user
 func (u *User) Ping() {
 	pong := make(chan bool)
-
 	for {
+		if u == nil {break}
 		if u.Conn != nil {
 			u.Conn.SetPongHandler(func(appData string) error {
 				pong <- true
@@ -128,23 +125,33 @@ func (u *User) Ping() {
 			})
 
 			u.Conn.WriteControl(websocket.PingMessage, []byte{}, time.Time{})
+			timer := time.Timer{}
 
+			select {
+			case <- timer.C:
+				CloseConn(u.Conn)
+			case <- pong:
+
+			}
 		}
+		time.Sleep(20 * time.Second)
 	}
+	close(pong)
 }
 
+// TODO: Call this whenever a game starts, or **player** restores their connection
 func (p *Player) WSBS() {
 	for {
 		_, msg, err := p.User.Conn.ReadMessage()
 		if err != nil {
-			// TODO:
-			panic(err)
+			CloseConn(p.User.Conn)
+			break
 		}
 		ev := Event{}
 		err = json.Unmarshal(msg, &ev)
 		if err != nil {
-			// TODO: close the connection
-			// break the loop
+			CloseConn(p.User.Conn)
+			break
 		}
 		switch ev.Event {
 		case E_SET:
@@ -155,7 +162,8 @@ func (p *Player) WSBS() {
 			err := json.Unmarshal(ev.Data, &cardsChosen)
 
 			if err != nil {
-				panic(err)
+				CloseConn(p.User.Conn)
+				break
 			}
 
 			err = game.CallSet(p.User.ID, cardsChosen)
@@ -193,7 +201,8 @@ func (p *Player) WSBS() {
 		case E_START:
 			game := p.Game
 			if p.User.ID != game.Owner.ID {
-				panic("Not owner")
+				CloseConn(p.User.Conn)
+				break
 			}
 			game.State = GS_PLAYING
 
@@ -201,10 +210,11 @@ func (p *Player) WSBS() {
 				Event: E_START,
 			})
 		default:
-			if err != nil {
-				// TODO: close the connection
-				// break the loop
-			}
+			CloseConn(p.User.Conn)
+		}
+		
+		if p.User.Conn == nil {
+			break
 		}
 	}
 }

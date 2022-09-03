@@ -10,7 +10,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/httprate"
-	"github.com/gorilla/websocket"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -119,8 +118,7 @@ func routerAPI() http.Handler {
 			}
 			usr := r.Context().Value(CTX_USR).(*User)
 			if usr.Conn != nil {
-				// TODO: Write reason
-				usr.Conn.WriteControl(websocket.CloseMessage, []byte{}, time.Time{})
+				CloseConn(usr.Conn)
 			}
 			usr.Conn = conn
 			UserMgr.Add(usr)

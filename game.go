@@ -113,13 +113,14 @@ func ParseCard(inp string) (Card, error) {
 }
 
 type User struct {
-	// Lock   sync.Mutex      `json:"-"`
 	ID     string          `json:"id"`
+	// Lock   sync.Mutex      `json:"-"`
 	Name   string          `json:"username"`
 	Wins   int             `json:"wins"`
 	Losses int             `json:"losses"`
 	Token  string          `json:"-"`
 	Conn   *websocket.Conn `json:"-"`
+	Player *Player 		   `json:"-"`
 }
 
 type Player struct {
@@ -198,12 +199,14 @@ func (g *Game) AddPlayer(usr *User) {
 		if g.State == GS_PLAYING {
 			won = -1
 		}
-		g.Players[usr.ID] = &Player{
+		p := &Player{
 			User:    usr,
 			SetsWon: won,
 			Silent:  false,
 			Game:    g,
 		}
+		usr.Player = p
+		g.Players[usr.ID] = p
 	}
 	// g.Lock.Unlock()
 }

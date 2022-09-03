@@ -4,6 +4,8 @@ import (
 	"math/rand"
 	"net/http"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 func RandInt(min, max int) int {
@@ -39,4 +41,10 @@ func Respond(w http.ResponseWriter, status int, msg []byte) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	w.Write(msg)
+}
+
+func CloseConn(conn *websocket.Conn) {
+	conn.WriteControl(websocket.CloseMessage, []byte{}, time.Time{})
+	conn.Close()
+	conn = nil
 }
