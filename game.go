@@ -130,10 +130,10 @@ type Game struct {
 	LastCall time.Time `json:"-"`
 	ID       string    `json:"id"`
 	Deck     []*Card   `json:"-"`
-	Owner    *User
-	Board    []*Card
-	State    GameState
-	Players  map[string]*Player
+	Owner    *User `json:"owner"`
+	Board    []*Card `json:"board"`
+	State    GameState `json:"state"`
+	Players  map[string]*Player `json:"players"`
 }
 
 func NewGame(owner *User) *Game {
