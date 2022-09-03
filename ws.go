@@ -128,7 +128,7 @@ func (u *User) Ping() {
 			})
 
 			u.Conn.WriteControl(websocket.PingMessage, []byte{}, time.Time{})
-			
+
 		}
 	}
 }

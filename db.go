@@ -10,10 +10,10 @@ import (
 )
 
 var (
-	SnowNode *snowflake.Node
-	DB *pgx.Conn
-	BASE_ID_TIME     = time.Date(2021, time.June, 1, 0, 0, 0, 0, time.UTC)
-	BASE_ID_STAMP    = BASE_ID_TIME.UnixMilli()
+	SnowNode      *snowflake.Node
+	DB            *pgx.Conn
+	BASE_ID_TIME  = time.Date(2021, time.June, 1, 0, 0, 0, 0, time.UTC)
+	BASE_ID_STAMP = BASE_ID_TIME.UnixMilli()
 )
 
 func init() {
@@ -45,7 +45,7 @@ func InitDB() {
 
 	err = conn.Ping(context.Background())
 	PanicIfErr(err)
-	
+
 	DB = conn
 
 	_, err = DBExec(sqlUserTable)
@@ -57,12 +57,10 @@ func DBExec(sql string, args ...interface{}) (pgconn.CommandTag, error) {
 	return DB.Exec(context.Background(), sql, args...)
 }
 
-
 func DBQuery(sql string, args ...interface{}) (pgx.Rows, error) {
 	return DB.Query(context.Background(), sql, args...)
 }
 
-
-func DBQueryRow(sql string, args ...interface{}) (pgx.Row) {
+func DBQueryRow(sql string, args ...interface{}) pgx.Row {
 	return DB.QueryRow(context.Background(), sql, args...)
 }

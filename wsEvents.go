@@ -19,7 +19,7 @@ const (
 )
 
 type Event struct {
-	Event WSEvent `json:"event"`
+	Event WSEvent         `json:"event"`
 	Data  json.RawMessage `json:"data,omitempty"`
 }
 
