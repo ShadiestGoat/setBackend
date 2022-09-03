@@ -25,7 +25,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rawAuth := r.Header.Get("Authorization")
 		auth := strings.Split(rawAuth, " ")
-		
+
 		if rawAuth == "" {
 			rawAuth = r.URL.Query().Get("auth")
 		}

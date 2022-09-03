@@ -24,6 +24,6 @@ type Event struct {
 }
 
 type EventSET struct {
-	PlayerID string   `json:"player"`
+	PlayerID string  `json:"player"`
 	Board    []*Card `json:"board"`
 }

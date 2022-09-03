@@ -128,10 +128,10 @@ const (
 type Game struct {
 	// Lock    *sync.Mutex
 	LastCall time.Time `json:"-"`
-	ID       string `json:"id"`
-	Deck     []*Card `json:"-"`
+	ID       string    `json:"id"`
+	Deck     []*Card   `json:"-"`
 	Owner    *User
-	Board    []*Card 
+	Board    []*Card
 	State    GameState
 	Players  map[string]*Player
 }
@@ -150,8 +150,8 @@ func NewGame(owner *User) *Game {
 	}
 
 	game := &Game{
-		ID:   SnowNode.Generate().String(),
-		Deck: deck,
+		ID:    SnowNode.Generate().String(),
+		Deck:  deck,
 		Board: []*Card{},
 		// Lock: &sync.Mutex{},
 	}
@@ -335,7 +335,9 @@ func BoardHasSetIgnoring(board []*Card, blacklist []int) bool {
 func CorrectSet(c1, c2, c3 *Card) bool {
 	for i := 0; i < 3; i++ {
 		for j := 0; j < 4; j++ {
-			if c1[j] == c2[j] && c1[j] != c3[j] {return false}
+			if c1[j] == c2[j] && c1[j] != c3[j] {
+				return false
+			}
 		}
 		c2, c3, c1 = c1, c2, c3
 	}

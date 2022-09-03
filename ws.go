@@ -149,7 +149,7 @@ func (u *User) Ping() {
 
 // TODO: Call this whenever a game starts, or **player** restores their connection
 func (p *Player) WSBS() {
-	
+
 	for {
 		_, msg, err := p.User.Conn.ReadMessage()
 		if err != nil {
