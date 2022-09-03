@@ -127,12 +127,12 @@ const (
 
 type Game struct {
 	// Lock    *sync.Mutex
-	LastCall time.Time `json:"-"`
-	ID       string    `json:"id"`
-	Deck     []*Card   `json:"-"`
-	Owner    *User `json:"owner"`
-	Board    []*Card `json:"board"`
-	State    GameState `json:"state"`
+	LastCall time.Time          `json:"-"`
+	ID       string             `json:"id"`
+	Deck     []*Card            `json:"-"`
+	Owner    *User              `json:"owner"`
+	Board    []*Card            `json:"board"`
+	State    GameState          `json:"state"`
 	Players  map[string]*Player `json:"players"`
 }
 
