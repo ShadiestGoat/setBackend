@@ -1,0 +1,11 @@
+- [x] Players profiles
+  - [x] Games won/lost in total
+  - [x] Username/whatever id
+- [ ] Game
+  - [ ] Player set attempt response
+    - [ ] Weather was successful
+  - [ ] "set"
+  - [ ] "start game"
+  - [ ] "dc"
+  - [ ] join as spectator
+- [ ] Multiple games at a time (diff users)
