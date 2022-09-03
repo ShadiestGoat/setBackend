@@ -113,14 +113,14 @@ func ParseCard(inp string) (Card, error) {
 }
 
 type User struct {
-	ID     string          `json:"id"`
+	ID string `json:"id"`
 	// Lock   sync.Mutex      `json:"-"`
 	Name   string          `json:"username"`
 	Wins   int             `json:"wins"`
 	Losses int             `json:"losses"`
 	Token  string          `json:"-"`
 	Conn   *websocket.Conn `json:"-"`
-	Player *Player 		   `json:"-"`
+	Player *Player         `json:"-"`
 }
 
 type Player struct {

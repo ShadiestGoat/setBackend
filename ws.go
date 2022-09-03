@@ -117,7 +117,9 @@ var UserMgr = &ManagerUser{}
 func (u *User) Ping() {
 	pong := make(chan bool)
 	for {
-		if u == nil {break}
+		if u == nil {
+			break
+		}
 		if u.Conn != nil {
 			u.Conn.SetPongHandler(func(appData string) error {
 				pong <- true
@@ -128,9 +130,9 @@ func (u *User) Ping() {
 			timer := time.Timer{}
 
 			select {
-			case <- timer.C:
+			case <-timer.C:
 				CloseConn(u.Conn)
-			case <- pong:
+			case <-pong:
 
 			}
 		}
@@ -212,7 +214,7 @@ func (p *Player) WSBS() {
 		default:
 			CloseConn(p.User.Conn)
 		}
-		
+
 		if p.User.Conn == nil {
 			break
 		}
